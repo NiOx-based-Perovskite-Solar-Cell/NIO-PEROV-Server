@@ -1,0 +1,83 @@
+# material name as typed (case/space-insensitive, "·" = ".") -> material.name. Canonical names match themselves.
+# form is set when the alias itself implies it (NP, film, target ...)
+alias,material,form
+ITO glass,ITO,substrate
+ITO/glass,ITO,substrate
+ITO/glass substrate,ITO,substrate
+ITO/PET,ITO-PET,
+FTO/glass,FTO,substrate
+FTO/glass substrate,FTO,substrate
+FTO-coated glass,FTO,substrate
+FTO-coated glass substrates,FTO,substrate
+NiO,NiOx,
+NiO target,NiOx,target
+NiOx target,NiOx,target
+Ni target,Ni,target
+Cu target,Cu,target
+Nanoporous NiOx,NiOx,nanoporous
+Cu:NiO,Cu:NiOx,
+La:NiO,La:NiOx,
+PC60BM,PC61BM,
+PCBM,PC61BM,
+[60]PCBM,PC61BM,
+Fullerene-C60,C60,
+Bathocuproine,BCP,
+"2,9-Dimethyl-4,7-diphenyl-1,10-phenanthroline",BCP,
+bathocuproine,BCP,
+Cs/FA/MA,CsFAMA,
+Cs/FA/MA triple-cation perovskite,CsFAMA,
+CsFAMA triple-cation perovskite,CsFAMA,
+Cs/FA/MA triple-cation,CsFAMA,
+CsFAMAPb(IBrCl)3,CsFAMA,
+CsPbI3 PeQDs,CsPbI3,QD
+NiNO3.6H2O,Ni(NO3)2·6H2O,
+NiNO3·6H2O,Ni(NO3)2·6H2O,
+Ni(NO3)2,Ni(NO3)2·6H2O,
+Nickel nitrate,Ni(NO3)2·6H2O,
+Nickel(II) nitrate,Ni(NO3)2·6H2O,
+Nickel nitrate hexahydrate,Ni(NO3)2·6H2O,
+Nickel(II) nitrate hexahydrate,Ni(NO3)2·6H2O,
+Ni(OAc)2·4H2O,Ni(CH3COO)2·4H2O,
+Ni (OCOCH3)2 4H2O,Ni(CH3COO)2·4H2O,
+Nickel acetate tetrahydrate,Ni(CH3COO)2·4H2O,
+Copper(II) acetate monohydrate,Cu(CH3COO)2·H2O,
+Nickel(II) acetylacetonate,Ni(acac)2,
+Nickel acetylacetonate,Ni(acac)2,
+Zirconium(IV) acetylacetonate,Zr(acac)4,
+ZrAcac,Zr(acac)4,
+Acac,Acetylacetone,
+Lithium nitrate,LiNO3,
+Sodium hydroxide,NaOH,
+Potassium borohydride,KBH4,
+NH3,NH3 (aq),
+Ammonia water,NH3 (aq),
+Hydriodic acid,HI,
+rubidium chloride,RbCl,
+MEA,Ethanolamine,
+Monoethanolamine,Ethanolamine,
+2-Aminoethanol,Ethanolamine,
+OAm,Oleylamine,
+OA,Oleic acid,
+ODE,1-Octadecene,
+1-methylimidazole,1-Methylimidazole,
+1-bromobutane,1-Bromobutane,
+CO(NH2)2,Urea,
+4-(2-Aminoethyl) benzoic acid,ABA,
+2-(4-fluorophenyl)ethylammonium iodide,p-F-PEAI,
+4-(trifluoromethyl) benzylammonium formate,TFMBAFa,
+5-chloro-7-azaindole,5C7A,
+3-(Triethoxysilyl)propylamine,TSPA,
+2-methylallylamine hydroiodide,CTBAI,
+"1,3-propane-diammonium iodide",PDADI2,
+piperazine dihydriodide,PDI,
+Aminoguanidine nitrate,AGN,
+trimercapto-s-triazine trisodium salt,TTTS,
+carbazole derivative,Cz,
+benzothieno[3,2-b]benzothiophene derivative,BTBT,
+2-Iodobenzoic acid,2-IBA,
+2-Iodobenzenesulfonic acid,2-IBSA,
+2-Iodophenylboronic acid,2-IPBA,
+4-Iodophenylboronic acid,4-IPBA,
+[2-(9H-carbazol-9-yl)ethyl]phosphonic acid,2PACz,
+NiOx:TTTS,NiOx:TTTS,
+Ar plasma,Ar plasma,

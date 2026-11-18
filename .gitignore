@@ -59,4 +59,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # clean pipeline local output
 /clean-output
 
-*.csv
+# *.csv

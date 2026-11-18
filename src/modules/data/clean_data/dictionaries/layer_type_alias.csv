@@ -1,0 +1,14 @@
+# LayerType without its sub-order suffix ("ETL2", "ETL treatment (1)") -> layer_role enum
+alias,role
+Anode,anode
+HTL,htl
+Hole transport layer,htl
+HTL treatment,htl_treatment
+PSK,psk
+Perovskite,psk
+PSK treatment,psk_treatment
+Perovskite treatment,psk_treatment
+ETL,etl
+Electron transport layer,etl
+ETL treatment,etl_treatment
+Cathode,cathode

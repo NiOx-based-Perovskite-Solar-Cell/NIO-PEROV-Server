@@ -1,0 +1,51 @@
+# ProcessType as typed -> process_type.code. Matched on letters+digits only, so "Thermal Evaporation" = "ThermalEvaporation"
+alias,process_type
+Wash,WASH
+EthanolWash,WASH
+Clean,WASH
+Cleaning,WASH
+Sonication,SONICATE
+Ultrasonication,SONICATE
+PlasmaTreat,PLASMA
+Plasma Treatment,PLASMA
+UV/Ozone Treat,UV_OZONE
+UV/Ozone Treatment,UV_OZONE
+UVO,UV_OZONE
+UV Treat,UV_TREAT
+UV Treatment,UV_TREAT
+Treatment,SURFACE_TREAT
+Surface Treatment,SURFACE_TREAT
+SpinCoating,SPIN_COAT
+Spin coat,SPIN_COAT
+BladeCoating,BLADE_COAT
+SlotDieCoating,SLOT_DIE
+Dip-Coating,DIP_COAT
+DipCoating,DIP_COAT
+SprayPyrolysis,SPRAY_PYROLYSIS
+ChemicalBathDeposition,CBD
+AntiSolvent,ANTISOLVENT
+Anti-solvent dripping,ANTISOLVENT
+ThermalEvaporation,THERMAL_EVAP
+Evaporation,THERMAL_EVAP
+E-beamEvaporation,EBEAM_EVAP
+ElectronBeamEvaporation,EBEAM_EVAP
+Sputtering,SPUTTER
+RFSputtering,SPUTTER
+MagnetronSputtering,SPUTTER
+PreSputtering,PRESPUTTER
+ALD,ALD
+Atomic layer deposition,ALD
+Annealing,ANNEAL
+Postannealing,ANNEAL
+Post-annealing,ANNEAL
+Dry,DRY
+Drying,DRY
+Stir,STIR
+Magnetic Stir,STIR
+Stirring,STIR
+Mix,MIX
+Mixing,MIX
+Dissolve,DISSOLVE
+pH adjustment,PH_ADJUST
+VacuumDegas,VACUUM
+VacuumEvacuation,VACUUM

@@ -1,0 +1,106 @@
+# vendor as typed -> canonical vendor. Matching ignores case, punctuation, country tags and Co./Ltd./Inc./Corp./LLC/GmbH,
+# so only real spelling differences need a row. A canonical name also matches itself
+alias,vendor
+Sigma-Aldrich,Sigma-Aldrich
+Sigma Aldrich,Sigma-Aldrich
+Aldrich,Sigma-Aldrich
+Alfa Aesar,Alfa Aesar
+Alfa Aesar Chemical,Alfa Aesar
+Acros Organics,Acros Organics
+Acros,Acros Organics
+ACROS Organic,Acros Organics
+TCI,TCI
+TCI Chemicals,TCI
+TCI Chemical,TCI
+Tokyo Chemical Industry,TCI
+TCI (Tokyo Chemical Industry),TCI
+TCI (Shanghai) Development,TCI
+Wako,Wako
+Wako Co.,Wako
+Greatcell Solar Materials,Greatcell Solar Materials
+Greatcell Solar,Greatcell Solar Materials
+GreatCell,Greatcell Solar Materials
+Great Cell Solar,Greatcell Solar Materials
+Great Cell Solar Materials,Greatcell Solar Materials
+Greatcellsolar Materials,Greatcell Solar Materials
+Dyesol,Greatcell Solar Materials
+Dysol,Greatcell Solar Materials
+Xi'an Polymer Light Technology,Xi'an Polymer Light Technology
+Xian Polymer Light Technol.,Xi'an Polymer Light Technology
+Luminescence Technology,Luminescence Technology (Lumtec)
+Lumtec,Luminescence Technology (Lumtec)
+Luminescence Technology (Lumtec),Luminescence Technology (Lumtec)
+Nano-C,Nano-C
+Nano C,Nano-C
+Solenne,Solenne
+Kurt J. Lesker,Kurt J. Lesker
+Angstrom Engineering,Angstrom Engineering
+Advanced Election Technology,Advanced Election Technology
+Liaoning Youxuan New Energy Technology,Liaoning Youxuan New Energy Technology
+Liaoing Youxuan New Energy Technology,Liaoning Youxuan New Energy Technology
+Youxuan Technology,Liaoning Youxuan New Energy Technology
+Ying Kou You Xuan Trade,Liaoning Youxuan New Energy Technology
+Xi'an Yuri Solar,Xi'an Yuri Solar
+Xi'an Biolite Photonics Technology,Xi'an Biolite Photonics Technology
+Xi'an Boilite Photonic Technology,Xi'an Biolite Photonics Technology
+Xi'an p-OLED Technology,Xi'an p-OLED Technology
+Xian p-OLED,Xi'an p-OLED Technology
+Xi'an Yiridayun Energy Technology,Xi'an Yiridayun Energy Technology
+Aladdin,Aladdin
+Shanghai Aladdin Biochemical Technology,Aladdin
+J&K Scientific,J&K Scientific
+J&K,J&K Scientific
+Adamas-beta,Adamas-beta
+Adamas,Adamas-beta
+Adamas Reagents,Adamas-beta
+Adamas (Titan Scientific),Adamas-beta
+Showa,Showa
+STAREK Scientific,STAREK Scientific
+Ruilong Optoelectronics Technology,Ruilong Optoelectronics Technology
+Ruilong,Ruilong Optoelectronics Technology
+Beijing HuaMin New Materials Technology,Beijing HuaMin New Materials Technology
+Beijing Huamin New Materials Technol.,Beijing HuaMin New Materials Technology
+Thermo Fisher Scientific,Thermo Fisher Scientific
+Thermo Scientific,Thermo Fisher Scientific
+Fisher,Thermo Fisher Scientific
+Sinopharm Chemical Reagent,Sinopharm Chemical Reagent
+Sinopharm,Sinopharm Chemical Reagent
+1-Materials,1-Materials
+1 Materials,1-Materials
+Nano Clean Tech,Nano Clean Tech
+Colorado Concept Coatings,Colorado Concept Coatings
+MER Corporation,MER Corporation
+Iolitec,Iolitec
+Nippon Sheet Glass,Nippon Sheet Glass
+Laiyan Technology,Laiyan Technology
+Solarmer Energy,Solarmer Energy
+South China Science & Technology,South China Science & Technology
+Vizuchem,Vizuchem
+Suzhou ShangYang Solar Technology,Suzhou ShangYang Solar Technology
+Xinyan Technology,Xinyan Technology
+Fluka,Fluka
+VWR,VWR
+Graphene Supermarket,Graphene Supermarket
+Zhong Nuo Advanced Material (Beijing) Technology,Zhong Nuo Advanced Material Technology
+Tianjin Kemiou Chemical Reagent,Tianjin Kemiou Chemical Reagent
+Duksan,Duksan
+Vital Thin Film Material,Vital Thin Film Material
+Shanghai MaterWin,Shanghai MaterWin
+Echo Chemical,Echo Chemical
+Ultimate Materials Technology,Ultimate Materials Technology
+Psiotec,Psiotec
+Leyan,Leyan
+Bidepharm,Bidepharm
+Tianjin Damao Chemical Reagent Factory,Tianjin Damao Chemical Reagent Factory
+Lanzhou Greenchem ILs,Lanzhou Greenchem ILs
+Macklin,Macklin
+Macklin (Shanghai),Macklin
+Uni-Onward,Uni-Onward
+AMG,AMG
+RND Korea,RND Korea
+Beijing Inokai Technology,Beijing Inokai Technology
+LiveStrong Optoelectronics Technology,LiveStrong Optoelectronics Technology
+Matrix Scientific,Matrix Scientific
+Yih Dar Technologies,Yih Dar Technologies
+Synthesized in-house,in-house
+in-house,in-house

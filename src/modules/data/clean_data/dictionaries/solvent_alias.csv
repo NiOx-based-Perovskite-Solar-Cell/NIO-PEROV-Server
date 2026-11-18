@@ -1,0 +1,49 @@
+# solvent name as typed (case/space-insensitive) -> material.name of the solvent. grade is set when the alias implies it
+alias,solvent,grade
+DMF,DMF,
+"N,N-Dimethylformamide",DMF,
+DMF stock,DMF,
+DMSO,DMSO,
+Dimethyl sulfoxide,DMSO,
+NMP,NMP,
+2ME,2-ME,
+2-ME,2-ME,
+2-methoxyethanol,2-ME,
+CB,CB,
+Chlorobenzene,CB,
+DCB,DCB,
+"1,2-Dichlorobenzene",DCB,
+IPA,IPA,
+Isopropanol,IPA,
+2-propanol,IPA,
+Isopropyl alcohol,IPA,
+Anhydrous IPA,IPA,anhydrous
+anhydrous isopropyl alcohol,IPA,anhydrous
+Ethanol,EtOH,
+EtOH,EtOH,
+ethyl alcohol,EtOH,
+Anhydrous ethanol,EtOH,anhydrous
+Anhydrous EtOH,EtOH,anhydrous
+Methanol,MeOH,
+MeOH,MeOH,
+Acetonitrile,ACN,
+ACN,ACN,
+Ethyl acetate,EA,
+EA,EA,
+Methyl acetate,MeOAc,
+MeOAc,MeOAc,
+Toluene,Toluene,
+Chloroform,Chloroform,
+Hexane,Hexane,
+Octane,Octane,
+Ethylene glycol,Ethylene glycol,
+C2H6O2,Ethylene glycol,
+ethanolamine,Ethanolamine,
+ethylenediamine,Ethylenediamine,
+C2H8N2,Ethylenediamine,
+H2O,H2O,
+Water,H2O,
+DI water,H2O,deionized
+Deionized water,H2O,deionized
+De-ionized water,H2O,deionized
+Distilled water,H2O,

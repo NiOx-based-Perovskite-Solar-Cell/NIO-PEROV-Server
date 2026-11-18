@@ -1,0 +1,38 @@
+# Materials.Type as typed (letters+digits only, trailing "(...)" removed) -> layer_ingredient.role
+alias,role
+Solution,solution
+Precursor,precursor
+Sol-gel precursor,precursor
+Fuel,precursor
+Additive,additive
+ETL additive,additive
+Co-SAM additive,additive
+Dopant,dopant
+NiOx post-treatment dopant,dopant
+Nanoparticles,nanoparticle
+Nanoparticle,nanoparticle
+Nanoparticle dispersion,nanoparticle
+Nanoparticle ink,nanoparticle
+Dispersion,nanoparticle
+SAM,sam
+SAM solution,sam
+SAM passivation layer,sam
+Co-modifier/SAM filler,sam
+Antisolvent,antisolvent
+Anti-solvent,antisolvent
+Substrate,substrate
+Evaporation,evaporation
+Evaporation material,evaporation
+Metal,evaporation
+Cathode,evaporation
+Target,sputter_target
+Sputtering target,sputter_target
+Thin film,thin_film
+Treatment,treatment
+PSK treatment,treatment
+PSK surface treatment,treatment
+Surface modifier,treatment
+Brønsted acid treatment,treatment
+Interlayer,interlayer
+ETL,interlayer
+ETL buffer,interlayer

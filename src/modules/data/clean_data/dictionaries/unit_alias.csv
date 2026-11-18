@@ -1,0 +1,119 @@
+# raw unit -> unit. Matched after NFKC, μ/µ/Μ unified and spaces and "·" removed, so "mg mL-1" = "mgmL-1".
+# Case matters (M = mol/L), but a lower-case match is used when it is unambiguous
+alias,unit
+s,s
+sec,s
+secs,s
+second,s
+seconds,s
+min,min
+mins,min
+minute,min
+minutes,min
+min each,min
+h,h
+hr,h
+hrs,h
+hour,h
+hours,h
+ns,ns
+μs,μs
+C,°C
+°C,°C
+oC,°C
+degC,°C
+celsius,°C
+C/min,°C/min
+°C/min,°C/min
+Pa,Pa
+Torr,Torr
+mtorr,mTorr
+mTorr,mTorr
+mbar,mbar
+MPa,MPa
+μL,μL
+μl,μL
+uL,μL
+ul,μL
+mL,mL
+ml,mL
+mg,mg
+g,g
+mg/mL,mg/mL
+mg/ml,mg/mL
+mg mL-1,mg/mL
+mgml-1,mg/mL
+g mL-1,g/mL
+g/mL,g/mL
+mg/L,mg/L
+mgL-1,mg/L
+M,mol/L
+M total,mol/L
+mol/L,mol/L
+mol L-1,mol/L
+mM,mmol/L
+mmol/L,mmol/L
+mmol L-1,mmol/L
+mmol mL-1,mmol/mL
+mol,mol
+mmol,mmol
+mol%,mol%
+wt%,wt%
+wt,wt%
+vol%,vol%
+mol ratio,ratio
+molar ratio,ratio
+v:v,ratio
+ratio,ratio
+%,%
+RPM,rpm
+rpm,rpm
+RPM/s,rpm/s
+Å/s,Å/s
+A/s,Å/s
+nm/s,nm/s
+W,W
+V,V
+mV,mV
+mm/sec,mm/s
+mm/s,mm/s
+nm,nm
+Å,Å
+μm,μm
+um,μm
+mm,mm
+times,times
+mA cm-2,mA/cm²
+mA/cm2,mA/cm²
+mA/cm-2,mA/cm²
+mA·cm-2,mA/cm²
+Ohm,Ω
+ohm,Ω
+Ω,Ω
+kOhm,kΩ
+kΩ,kΩ
+Ω cm2,Ω·cm²
+Ohm cm2,Ω·cm²
+Ohm/cm2,Ω·cm²
+Ω/cm2,Ω·cm²
+kOhm cm2,kΩ·cm²
+kΩ cm2,kΩ·cm²
+Ω/sq,Ω/sq
+Ohm/sq,Ω/sq
+Ω sq-1,Ω/sq
+Ω □-1,Ω/sq
+eV,eV
+cm-3,cm⁻³
+cm-3 eV-1,cm⁻³·eV⁻¹
+cm-3 e/V,cm⁻³·eV⁻¹
+deg,°
+degree,°
+degrees,°
+°,°
+S cm-1,S/cm
+S/cm,S/cm
+cm2/Vs,cm²/(V·s)
+cm2 V-1 s-1,cm²/(V·s)
+cm2/(V s),cm²/(V·s)
+m2 V-1 s-1,m²/(V·s)
+F,F

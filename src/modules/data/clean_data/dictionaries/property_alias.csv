@@ -1,0 +1,83 @@
+# property name after "Champion/Average" and "(RS)/(FS)/(...)" are removed (case/space-insensitive) -> property.code
+alias,property
+PCE,PCE
+Efficiency,PCE
+SPO,PCE_SPO
+SPO PCE,PCE_SPO
+Stabilized PCE,PCE_SPO
+Voc,Voc
+Jsc,Jsc
+Integrated Jsc,Jsc_EQE
+Integrated EQE Jsc,Jsc_EQE
+Jsc EQE,Jsc_EQE
+EQE Jsc,Jsc_EQE
+SPO Jsc,Jsc_SPO
+FF,FF
+Fill factor,FF
+HI,HI
+Hysteresis Index,HI
+Rs,Rs
+EIS Rs,Rs
+Series Resistance,Rs
+Rsh,Rsh
+Shunt Resistance,Rsh
+Rrec,Rrec
+Rec,Rrec
+EIS Rrec,Rrec
+Recombination Resistance,Rrec
+Crec,Crec
+VTFL,VTFL
+Electron VTFL,VTFL_e
+Hole VTFL,VTFL_h
+Trap Density,trap_density
+Trap densitiy,trap_density
+Electron Trap Density,trap_density_e
+Hole Trap Density,trap_density_h
+Defect density,defect_density
+tDOS,tDOS
+Carrier concentration,carrier_concentration
+Grain Size,grain_size
+Grain size range,grain_size
+Perovskite Grain Size,grain_size
+PSK grain size,grain_size
+HTL grain size,grain_size
+RMS,rms_roughness
+RMS Roughness,rms_roughness
+Roughness RMS,rms_roughness
+Roughness,rms_roughness
+AFM rms,rms_roughness
+AFM Roughness,rms_roughness
+Rq,rms_roughness
+Contact Angle,contact_angle
+Work Function,work_function
+WF,work_function
+VBM,VBM
+VB,VBM
+CBM,CBM
+Fermi Level,fermi_level
+EF,fermi_level
+Bandgap,bandgap
+Band gap,bandgap
+Optical Bandgap,bandgap
+Optical band gap,bandgap
+HTL optical band gap,bandgap
+PSK optical band gap,bandgap
+Energy gap,bandgap
+Eg,bandgap
+FWHM,FWHM
+TRPL t1,TRPL_t1
+TRPL t2,TRPL_t2
+TRPL tavg,TRPL_tavg
+PL Lifetime,PL_lifetime_avg
+Ideality Factor,ideality_factor
+Vbi,Vbi
+Conductivity,conductivity
+Electrical conductivity,conductivity
+Hole Mobility,hole_mobility
+Carrier Mobility,carrier_mobility
+Surface Potential,surface_potential
+KPFM,surface_potential
+KPFM CPD,surface_potential
+KPFM Surface Potential,surface_potential
+Voltage Deficit,voltage_deficit
+Potential Fluctuation,potential_fluctuation

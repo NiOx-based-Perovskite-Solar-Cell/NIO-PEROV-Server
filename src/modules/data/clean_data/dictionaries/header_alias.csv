@@ -1,0 +1,58 @@
+# sheet,raw header (matched on letters+digits only, so "Temperature (°C)" = "temperature (C)" = "Temperature (�C)"),canonical column
+sheet,alias,canonical
+layer,LayerID,layer_id
+layer,Layer ID,layer_id
+layer,LayerType,layer_type
+layer,Layer Type,layer_type
+layer,Material,material
+layer,Thickness (nm),thickness_nm
+layer,Thickness,thickness_nm
+vendor,Material,material
+vendor,%Purity,purity
+vendor,Purity,purity
+vendor,Purity (%),purity
+vendor,Vender,vendor
+vendor,Vendor,vendor
+vendor,Supplier,vendor
+materials,LayerID,layer_id
+materials,Material,material
+materials,Type,type
+materials,Solvent,solvent
+materials,Amount,amount
+materials,Unit,unit
+process,LayerID,layer_id
+process,StepOrder,step_order
+process,Step,step_order
+process,ProcessType,process_type
+process,Descriptions,description
+process,Description,description
+process,Parameter,parameter
+process,Parameters,parameter
+process,Unit,unit
+process,Units,unit
+process,Remarks,remarks
+properties,Properties,property
+properties,Property,property
+properties,Values,value
+properties,Value,value
+properties,Errors,error
+properties,Error,error
+properties,Unit,unit
+properties,Remarks,remarks
+stability,Environment,environment
+stability,Encapsulation,encapsulation
+stability,Temperature (°C),temperature_c
+stability,temperature (celsius),temperature_c
+stability,Temperature,temperature_c
+stability,Humidity (%),rh_pct
+stability,relative humidity (%),rh_pct
+stability,RH (%),rh_pct
+stability,Time (hr),duration_h
+stability,Time,duration_h
+stability,Retention (%),retention_pct
+stability,Normalize PCE (%),retention_pct
+stability,Normalized PCE (%),retention_pct
+stability,Final normalize PCE (%),retention_pct
+stability,T80 (hr),t80_h
+stability,Initial PCE (%),initial_pce
+stability,Final PCE (%),final_pce

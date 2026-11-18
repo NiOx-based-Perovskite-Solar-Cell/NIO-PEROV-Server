@@ -1,0 +1,13 @@
+# Stability.Environment keyword rules (case-insensitive regex). Per field the lowest priority that matches wins
+field,priority,pattern,value
+atmosphere,10,\bN2\b|nitrogen|glove ?box,N2
+atmosphere,20,humidity box,humidity_box
+atmosphere,30,desiccator,desiccator
+atmosphere,40,ambient|\bair\b|outdoor,air
+light,10,\bdark\b,dark
+light,20,\bLED\b,LED
+light,30,outdoor,outdoor
+light,40,1[- ]?sun|AM ?1\.5|illuminat,1-sun
+mode,10,\bMPPT?\b|MPP tracking|operational,MPPT
+mode,20,thermal,thermal
+mode,30,storage|shelf,storage

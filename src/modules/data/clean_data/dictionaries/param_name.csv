@@ -1,0 +1,18 @@
+# unit quantity (+ process type, * = any) -> process_param.param. The most specific row wins
+quantity,process_type,param
+rotation_speed,*,spin_speed
+rotation_speed,STIR,stir_speed
+rotation_acceleration,*,acceleration
+time,*,duration
+time,ANTISOLVENT,drip_time
+temperature,*,temperature
+temperature_rate,*,ramp_rate
+pressure,*,pressure
+volume,*,volume
+deposition_rate,*,rate
+power,*,power
+voltage,*,voltage
+concentration_molar,*,concentration
+count,*,repetitions
+length,*,gap
+linear_speed,*,coating_speed

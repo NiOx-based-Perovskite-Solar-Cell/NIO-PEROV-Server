@@ -1,0 +1,15 @@
+# sheet name (matched case/space-insensitive) -> canonical sheet and process scope
+alias,sheet,scope
+Layer,layer,
+Layers,layer,
+Vender,vendor,
+Vendor,vendor,
+Vendors,vendor,
+Materials,materials,
+Material,materials,
+Process,process,layer
+NiOx synthesis,process,material_synthesis
+Synthesis,process,material_synthesis
+Properties,properties,
+Property,properties,
+Stability,stability,

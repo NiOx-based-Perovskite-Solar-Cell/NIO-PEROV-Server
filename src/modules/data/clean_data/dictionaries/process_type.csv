@@ -1,0 +1,27 @@
+# canonical process types. category: deposition | thermal | cleaning | surface | solution | other
+code,category
+WASH,cleaning
+SONICATE,cleaning
+PLASMA,surface
+UV_OZONE,surface
+UV_TREAT,surface
+SURFACE_TREAT,surface
+SPIN_COAT,deposition
+BLADE_COAT,deposition
+SLOT_DIE,deposition
+DIP_COAT,deposition
+SPRAY_PYROLYSIS,deposition
+CBD,deposition
+ANTISOLVENT,deposition
+THERMAL_EVAP,deposition
+EBEAM_EVAP,deposition
+SPUTTER,deposition
+PRESPUTTER,deposition
+ALD,deposition
+ANNEAL,thermal
+DRY,thermal
+STIR,solution
+MIX,solution
+DISSOLVE,solution
+PH_ADJUST,solution
+VACUUM,other
