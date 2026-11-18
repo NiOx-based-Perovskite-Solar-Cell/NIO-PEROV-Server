@@ -60,7 +60,6 @@ export interface FileRegistry {
   file_name: string;
   file_prefix: string | null;
   doi: string | null;
-  doi_verified: boolean;
   sample_no: number | null;
   sha256: string;
   size_bytes: number;
@@ -289,7 +288,6 @@ export interface GoldDocument {
   paper: {
     doi: string | null;
     file_prefix: string | null;
-    doi_verified: boolean;
   };
   sample: {
     sample_no: number | null;

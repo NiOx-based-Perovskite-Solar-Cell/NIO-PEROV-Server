@@ -200,8 +200,7 @@
 const RULES = {
   // ingest / structure
   file_name_unparsed: 'ชื่อไฟล์ไม่เป็นรูปแบบ <DOI>_Sample<n>.xlsx จึงไม่รู้ DOI และเลข sample',
-  doi_not_in_registry: 'prefix ของไฟล์ไม่อยู่ใน paper_registry.csv — DOI ได้มาจากการเดา',
-  doi_unverified: 'DOI ใน paper_registry.csv ยังไม่มีคนยืนยัน (verified=false)',
+  doi_unparsed: 'อ่าน DOI จากชื่อไฟล์ไม่ได้',
   file_unreadable: 'เปิดไฟล์ xlsx ไม่ได้',
   duplicate_file: 'เนื้อหาไฟล์ซ้ำกับไฟล์อื่น (sha256 เท่ากัน) จึงข้ามไป',
   sample_key_conflict: 'DOI + sample_no ซ้ำกับไฟล์อื่น แต่เนื้อหาต่างกัน ต้องให้คนเลือกว่าจะใช้ไฟล์ไหน',
@@ -343,7 +342,7 @@ function recordsToGold(d, file) {
       + (many && s.basis ? ` (${s.basis})` : '');
   };
   return {
-    paper: { doi: file.doi, file_prefix: file.file_prefix, doi_verified: file.doi_verified },
+    paper: { doi: file.doi, file_prefix: file.file_prefix },
     sample: { sample_no: file.sample_no, architecture: null, source_file: file.file_name, file_sha256: file.sha256 },
     layers: (d.layers ?? []).map((l) => ({
       position: l.position, sub_order: l.sub_order, role: l.role ?? l.layer_type, layer_type_raw: l.layer_type_raw,
@@ -589,7 +588,7 @@ function renderFiles() {
     .map(({ r, i }) => `
       <tr class="file ${selected === i ? 'sel' : ''}" data-i="${i}">
         <td class="mono">${esc(r.file.file_name)}</td>
-        <td class="mono">${dash(r.file.doi)}${r.file.doi_verified ? '' : ' <span class="badge b-plain" title="DOI ยังไม่ได้ยืนยัน">?</span>'}</td>
+        <td class="mono">${dash(r.file.doi)}</td>
         <td class="num">${dash(r.file.sample_no)}</td>
         <td><span class="badge b-${esc(r.status)}">${esc(r.status)}</span>${r.stopped_at ? ` <span class="badge b-plain">หยุดที่ ${esc(r.stopped_at)}</span>` : ''}</td>
         <td class="num">${r.stats?.rows_clean ?? 0}</td>

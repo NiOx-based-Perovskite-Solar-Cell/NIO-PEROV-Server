@@ -46,7 +46,6 @@ export class LoadStep {
       paper: {
         doi: f.doi,
         file_prefix: f.file_prefix,
-        doi_verified: f.doi_verified,
       },
       sample: {
         sample_no: f.sample_no,

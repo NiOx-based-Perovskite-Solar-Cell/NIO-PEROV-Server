@@ -59,10 +59,6 @@ const vendorKey = (s: string) =>
 
 @Injectable()
 export class DictionaryService {
-  private readonly papers = new Map<
-    string,
-    { doi: string; verified: boolean }
-  >();
   private readonly sheets = new Map<
     string,
     { sheet: SheetKey; scope: ProcessScope | null }
@@ -100,12 +96,6 @@ export class DictionaryService {
   }
 
   private load(dir: string): void {
-    for (const r of this.read(dir, 'paper_registry.csv')) {
-      this.papers.set(r.file_prefix, {
-        doi: r.doi.toLowerCase(),
-        verified: r.verified.toLowerCase() === 'true',
-      });
-    }
     for (const r of this.read(dir, 'sheet_alias.csv')) {
       this.sheets.set(compactKey(r.alias), {
         sheet: r.sheet as SheetKey,
@@ -216,10 +206,6 @@ export class DictionaryService {
   }
 
   // ---------- lookups ----------
-
-  paper(prefix: string | null) {
-    return prefix === null ? undefined : this.papers.get(prefix);
-  }
 
   sheet(name: string) {
     const key = compactKey(name);

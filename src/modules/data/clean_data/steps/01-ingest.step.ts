@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import * as XLSX from 'xlsx';
-import { DictionaryService } from '../dictionary/dictionary.service';
 import type {
   FileRegistry,
   IngestData,
@@ -22,17 +21,13 @@ export interface IngestInput {
  */
 @Injectable()
 export class IngestStep {
-  constructor(private readonly dict: DictionaryService) {}
-
   run({ fileName, buffer }: IngestInput): PipelineState<IngestData> {
     const parsed = parseFileName(fileName);
-    const registry = this.dict.paper(parsed?.file_prefix ?? null);
 
     const file: FileRegistry = {
       file_name: fileName.replace(/^.*[\\/]/, ''),
       file_prefix: parsed?.file_prefix ?? null,
-      doi: registry?.doi ?? parsed?.doi_guess ?? null,
-      doi_verified: registry?.verified ?? false,
+      doi: parsed?.doi_guess ?? null,
       sample_no: parsed?.sample_no ?? null,
       sha256: createHash('sha256').update(buffer).digest('hex'),
       size_bytes: buffer.length,
@@ -47,16 +42,10 @@ export class IngestStep {
           'File name is not "<DOI>_Sample<n>.xlsx", so doi and sample_no are unknown',
         raw_value: file.file_name,
       });
-    } else if (!registry) {
+    } else if (!file.doi) {
       qc.warn({
-        rule: 'doi_not_in_registry',
-        message: `Prefix "${parsed.file_prefix}" is not in paper_registry.csv; DOI guessed as ${file.doi ?? '-'}`,
-        raw_value: parsed.file_prefix,
-      });
-    } else if (!registry.verified) {
-      qc.warn({
-        rule: 'doi_unverified',
-        message: `DOI ${registry.doi} in paper_registry.csv has not been checked against the paper yet`,
+        rule: 'doi_unparsed',
+        message: `Cannot read a DOI from file prefix "${parsed.file_prefix}"`,
         raw_value: parsed.file_prefix,
       });
     }

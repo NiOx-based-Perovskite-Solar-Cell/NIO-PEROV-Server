@@ -30,7 +30,7 @@ export class CleanDataModule {}
 export function createCleanDataService(): CleanDataService {
   const dict = new DictionaryService();
   return new CleanDataService(
-    new IngestStep(dict),
+    new IngestStep(),
     new StructureStep(dict),
     new StandardizeStep(dict),
     new ResolveStep(dict),

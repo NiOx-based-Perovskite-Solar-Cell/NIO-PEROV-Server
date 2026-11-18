@@ -9,7 +9,7 @@ export interface ParsedFileName {
  *   10.1002_solr.202400534   -> "_" stands for "/"
  *   10_1002_solr_202400534   -> every "." and "/" became "_"
  *   10.1016j.nanoen.2021.106285 / 10.1016.jpowsour... -> "/" dropped or became "."
- * The guess is only a fallback - paper_registry.csv is the source of truth
+ * The DOI comes from the file name only - name files with the real DOI
  */
 export function parseFileName(fileName: string): ParsedFileName | null {
   const base = fileName.replace(/^.*[\\/]/, '');
