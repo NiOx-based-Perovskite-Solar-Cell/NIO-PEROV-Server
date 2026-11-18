@@ -1,0 +1,38 @@
+# รันแยก:  docker compose up -d --build   (ใน folder nio-perov-server)
+# ต้องรัน nio-perov-db (postgres + minio) ก่อน และมี network:  docker network create nio-perov-net
+
+services:
+
+  nio-perov-server:
+    container_name: nio-perov-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4200:4200"
+    env_file:
+      - ./.env
+    environment:
+      # override ค่าจาก .env ให้ชี้ไปที่ container ใน docker network แทน localhost
+      PG_HOST: nio-perov-db
+      PG_PORT: 4467
+      DB_HOST: nio-perov-db
+      DB_PORT: 4467
+      MINIO_ENDPOINT: nio-perov-minio
+      MINIO_PORT: 4000
+      NODE_ENV: production
+      TZ: Asia/Bangkok
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - nio-perov-net
+
+networks:
+  nio-perov-net:
+    name: nio-perov-net
+    external: true

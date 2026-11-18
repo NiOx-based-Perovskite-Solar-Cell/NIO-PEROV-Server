@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean Data Viewer</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --ink: #1c2430; --muted: #5d6877; --line: #e2e6eb;
+    --soft: #f0f2f5; --accent: #2f6fdb;
+    --ok: #1f8a4c; --ok-bg: #e5f5ec; --warn: #b26a00; --warn-bg: #fff3dc;
+    --err: #c23434; --err-bg: #fde8e8; --dup: #6b5bb5; --dup-bg: #eeebfa;
+    --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161c; --panel: #1a2029; --ink: #e5e9ef; --muted: #9aa5b4; --line: #2c3440;
+      --soft: #222a35; --accent: #6b9cff;
+      --ok: #5fd08f; --ok-bg: #173325; --warn: #f0b350; --warn-bg: #3a2c12;
+      --err: #ff7b7b; --err-bg: #3d1c1c; --dup: #b3a6ff; --dup-bg: #2a2545;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.55 "Segoe UI", "Noto Sans Thai", system-ui, sans-serif; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 28px 0 10px; }
+  h3 { font-size: 15px; margin: 18px 0 8px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  textarea { width: 100%; min-height: 160px; resize: vertical; font: 12px/1.5 var(--mono);
+    background: var(--soft); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  button, select, input[type=search] { font: inherit; color: var(--ink); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 7px; padding: 7px 12px; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .msg { margin-top: 8px; font-size: 13px; }
+  .msg.bad { color: var(--err); }
+  .hidden { display: none !important; }
+
+  .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 12px; }
+  .flow div { border-radius: 8px; padding: 8px; font-size: 12px; border: 1px solid var(--line); background: var(--soft); }
+  .flow b { display: block; font-size: 11px; letter-spacing: .04em; color: var(--muted); }
+  @media (max-width: 760px) { .flow { grid-template-columns: repeat(2, 1fr); } }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .card .n { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .card .l { color: var(--muted); font-size: 12.5px; }
+  .card.ok .n { color: var(--ok); } .card.warn .n { color: var(--warn); }
+  .card.err .n { color: var(--err); } .card.dup .n { color: var(--dup); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+  .bars { display: flex; flex-direction: column; gap: 5px; }
+  .bar { display: grid; grid-template-columns: 190px 1fr 40px; gap: 8px; align-items: center; font-size: 12.5px; }
+  .bar .name { font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar .track { background: var(--soft); border-radius: 4px; height: 12px; overflow: hidden; }
+  .bar .fill { height: 100%; border-radius: 4px; }
+  .bar .v { text-align: right; color: var(--muted); }
+  .hint { color: var(--muted); font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; background: var(--soft); position: sticky; top: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; max-height: 520px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
+  tr.file { cursor: pointer; } tr.file:hover td { background: var(--soft); }
+  tr.file.sel td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .raw { color: var(--muted); font-family: var(--mono); font-size: 11.5px; }
+
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .b-passed { color: var(--ok); background: var(--ok-bg); }
+  .b-partial, .b-warn { color: var(--warn); background: var(--warn-bg); }
+  .b-failed, .b-error { color: var(--err); background: var(--err-bg); }
+  .b-duplicate { color: var(--dup); background: var(--dup-bg); }
+  .b-plain { color: var(--muted); background: var(--soft); font-weight: 500; }
+
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin: 14px 0 12px; }
+  .tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 8px 10px; color: var(--muted); }
+  .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  .tabs .c { font-size: 11px; color: var(--muted); margin-left: 3px; }
+
+  .kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+  .kv div { background: var(--soft); border-radius: 8px; padding: 8px 10px; }
+  .kv span { display: block; color: var(--muted); font-size: 11.5px; }
+  .kv b { font-weight: 600; word-break: break-word; }
+
+  .stack { display: flex; flex-direction: column-reverse; gap: 3px; max-width: 520px; }
+  .layer { display: grid; grid-template-columns: 120px 1fr 80px; gap: 8px; align-items: center;
+    padding: 7px 10px; border-radius: 6px; font-size: 13px; border-left: 5px solid; background: var(--soft); }
+  .layer .role { font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  .layer .t { text-align: right; color: var(--muted); font-size: 12px; }
+  .layer.empty { opacity: .45; }
+
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+  .metric { border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .metric .n { font-size: 22px; font-weight: 700; }
+  .metric .l { color: var(--muted); font-size: 12px; }
+
+  .issue { border: 1px solid var(--line); border-left: 4px solid var(--err); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; background: var(--panel); }
+  .issue.warn { border-left-color: var(--warn); }
+  .issue .head { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+  .issue .why { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  .rawrow { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .rawrow span { background: var(--soft); border-radius: 5px; padding: 2px 6px; font-family: var(--mono); font-size: 11.5px; }
+  .rawrow span i { color: var(--muted); font-style: normal; }
+  .chip { display: inline-block; background: var(--soft); border-radius: 5px; padding: 1px 6px; margin: 1px 2px 1px 0; font-size: 12px; }
+  details summary { cursor: pointer; color: var(--muted); }
+  /* Excel-like view after clean */
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .sheet-head h2 { margin: 0; font-size: 22px; font-weight: 600; }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { border: 1px solid var(--line); background: var(--soft); color: var(--muted); border-radius: 7px; padding: 4px 11px; font-size: 13px; }
+  .pill.on { background: var(--ink); border-color: var(--ink); color: var(--panel); font-weight: 600; }
+  .pill.bad { text-decoration: line-through; }
+  .sheet-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin: 14px 0 18px; flex-wrap: wrap; }
+  .sheet-tabs button { border: 0; background: none; padding: 0 0 8px; border-radius: 0; color: var(--muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .sheet-tabs button.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+  .xl { border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+  .xl table { font-size: 13px; }
+  .xl th { background: color-mix(in srgb, var(--soft) 70%, #e9e4d6 30%); color: var(--ink); font-weight: 500; position: static; padding: 10px 12px; }
+  .xl td { padding: 9px 12px; }
+  .xl tr:last-child td { border-bottom: 0; }
+  .xl .sm { color: var(--muted); font-size: 11.5px; }
+  .xl .new { color: var(--warn); font-size: 11px; margin-left: 4px; }
+  .stage-note { border: 1px solid var(--warn); background: var(--warn-bg); border-radius: 8px; padding: 9px 12px; margin: -6px 0 16px; font-size: 13px; }
+  .stage-note b { color: var(--warn); }
+  .picker { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .picker select { max-width: 100%; }
+
+  pre { background: var(--soft); padding: 10px; border-radius: 8px; overflow: auto; font: 11.5px/1.5 var(--mono); max-height: 420px; }
+  .empty-note { color: var(--muted); padding: 10px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Clean Data Viewer</h1>
+  <p class="sub">ใช้ดูผลลัพธ์จาก <span class="mono">POST /v1/clean-data/run</span> โดยวาง response JSON ลงในช่องด้านล่าง แล้วกด “แสดงผล”</p>
+
+  <div class="panel">
+    <textarea id="input" spellcheck="false" placeholder='วาง JSON ทั้งก้อนที่นี่ เช่น { "success": true, "data": { "summary": {...}, "results": [...] } }'></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="go">แสดงผล</button>
+      <label class="row" style="gap:6px"><input type="file" id="file" accept=".json,application/json"> หรือเปิดไฟล์ .json</label>
+      <button id="clear">ล้าง</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div class="flow">
+      <div><b>01 · INGEST</b>อ่านไฟล์ แยก DOI / sample, sha256</div>
+      <div><b>02 · STRUCTURE</b>หา sheet, แปลง header, ลบแถวว่าง</div>
+      <div><b>03 · STANDARDIZE</b>parse ตัวเลข ช่วง ± หน่วย</div>
+      <div><b>04 · RESOLVE</b>จับคู่ชื่อกับ dictionary</div>
+      <div><b>05 · VALIDATE</b>ตรวจช่วงค่า / FK แยกแถวไม่ผ่าน</div>
+      <div><b>06 · LOAD</b>สร้าง gold JSON</div>
+    </div>
+  </div>
+
+  <div id="out" class="hidden">
+    <h2>ภาพรวม</h2>
+    <div class="cards" id="cards"></div>
+    <p class="hint" style="margin-top:8px">
+      <span class="badge b-passed">passed</span> ผ่านทุกแถว ·
+      <span class="badge b-partial">partial</span> มีบางแถวถูกกัก (quarantine) แต่ส่วนที่เหลือใช้ได้ ·
+      <span class="badge b-failed">failed</span> ใช้ไม่ได้ทั้งไฟล์ ·
+      <span class="badge b-duplicate">duplicate</span> ไฟล์ซ้ำ (hash เดียวกัน) ข้ามไป
+    </p>
+
+    <div class="two" style="margin-top:12px">
+      <div class="panel"><h3 style="margin-top:0">Error ที่พบบ่อย <span class="hint">(ทำให้แถวไม่ผ่าน)</span></h3><div class="bars" id="errBars"></div></div>
+      <div class="panel"><h3 style="margin-top:0">Warning ที่พบบ่อย <span class="hint">(แถวยังผ่าน แค่แจ้งเตือน)</span></h3><div class="bars" id="warnBars"></div></div>
+    </div>
+
+    <h2>ตารางหลัง clean <span class="hint">— แยกตาม paper และ sample เหมือนในไฟล์ Excel</span></h2>
+    <div class="panel">
+      <div class="picker"><span class="hint">Paper</span><select id="paperSel"></select></div>
+      <div id="sheetView"></div>
+    </div>
+
+    <h2>รายไฟล์ <span class="hint">— คลิกแถวเพื่อดูรายละเอียด</span></h2>
+    <div class="row" style="margin-bottom:8px">
+      <input type="search" id="q" placeholder="ค้นหาชื่อไฟล์ / DOI" style="min-width:240px">
+      <select id="fStatus"><option value="">ทุกสถานะ</option><option>passed</option><option>partial</option><option>failed</option><option>duplicate</option></select>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr><th>ไฟล์</th><th>DOI</th><th class="num">Sample</th><th>สถานะ</th>
+        <th class="num">แถวผ่าน</th><th class="num">แถวถูกกัก</th><th class="num">Error</th><th class="num">Warning</th></tr></thead>
+      <tbody id="files"></tbody>
+    </table></div>
+
+    <div id="detail" class="panel hidden" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<script>
+const RULES = {
+  // ingest / structure
+  file_name_unparsed: 'ชื่อไฟล์ไม่เป็นรูปแบบ <DOI>_Sample<n>.xlsx จึงไม่รู้ DOI และเลข sample',
+  doi_not_in_registry: 'prefix ของไฟล์ไม่อยู่ใน paper_registry.csv — DOI ได้มาจากการเดา',
+  doi_unverified: 'DOI ใน paper_registry.csv ยังไม่มีคนยืนยัน (verified=false)',
+  file_unreadable: 'เปิดไฟล์ xlsx ไม่ได้',
+  duplicate_file: 'เนื้อหาไฟล์ซ้ำกับไฟล์อื่น (sha256 เท่ากัน) จึงข้ามไป',
+  sample_key_conflict: 'DOI + sample_no ซ้ำกับไฟล์อื่น แต่เนื้อหาต่างกัน ต้องให้คนเลือกว่าจะใช้ไฟล์ไหน',
+  sheet_unknown: 'มี sheet ที่ไม่รู้จัก จึงข้ามไป',
+  sheet_missing: 'ไม่มี sheet ที่ควรมี',
+  column_missing: 'ไม่มีคอลัมน์ที่จำเป็น จึงข้ามทั้ง sheet',
+  header_unmapped: 'header นี้ไม่อยู่ใน header_alias.csv จึงไม่ได้ใช้คอลัมน์นี้',
+  header_duplicate: 'มีคอลัมน์ที่ map ไปชื่อเดียวกันสองคอลัมน์',
+  unnamed_column_data: 'มีค่าอยู่ในคอลัมน์ที่ไม่มี header จึงไม่ได้ใช้',
+  // standardize
+  layer_id_invalid: 'LayerID ต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป',
+  value_unparseable: 'อ่านค่านี้เป็นตัวเลขไม่ได้',
+  value_missing: 'มีชื่อ property แต่ไม่มีค่า',
+  property_missing: 'มีค่าแต่ไม่มีชื่อ property',
+  unit_unmapped: 'หน่วยนี้ไม่อยู่ใน unit_alias.csv',
+  unit_missing: 'มีปริมาณแต่ไม่มีหน่วย',
+  thickness_unparseable: 'อ่านค่าความหนาไม่ได้',
+  thickness_count_mismatch: 'จำนวนค่าความหนาไม่ตรงกับจำนวนวัสดุในชั้น จึงเก็บเป็นผลรวม',
+  layer_material_missing: 'มีความหนาแต่ไม่มีชื่อวัสดุ',
+  ingredient_material_missing: 'แถวใน Materials ไม่มีชื่อสาร',
+  solvent_ratio_mismatch: 'จำนวนชื่อ solvent ไม่ตรงกับจำนวนตัวเลขอัตราส่วน',
+  solvent_ratio_missing: 'มี solvent หลายตัวแต่ไม่บอกอัตราส่วน',
+  amount_unparseable: 'อ่านค่า Amount ไม่ได้ (มีข้อความปนอยู่)',
+  step_order_invalid: 'StepOrder ไม่ใช่จำนวนเต็ม',
+  param_unit_mismatch: 'จำนวนค่าใน Parameter ไม่เท่ากับจำนวนหน่วยใน Unit (เช่น Excel กินเครื่องหมาย comma ไป)',
+  param_unparseable: 'อ่านค่าพารามิเตอร์เป็นตัวเลขไม่ได้ (เช่น พิมพ์ "1o")',
+  param_empty_token: 'มีค่าว่างระหว่าง comma จึงตัดออก',
+  param_unit_inline: 'พิมพ์ค่ากับหน่วยไว้ในช่องเดียวกัน ระบบแยกให้อัตโนมัติ',
+  purity_unparseable: 'อ่านค่า %Purity ไม่ได้',
+  error_unparseable: 'อ่านค่า Errors ไม่ได้ จึงไม่ได้ใช้',
+  encapsulation_invalid: 'Encapsulation ต้องเป็น Y หรือ N',
+  environment_unparsed: 'ไม่พบคำที่บอกบรรยากาศ / แสง / โหมด / ISOS ใน Environment',
+  // resolve
+  layer_type_unmapped: 'LayerType ไม่ใช่ 1 ใน 8 บทบาทของชั้น',
+  process_type_unmapped: 'ProcessType ไม่อยู่ใน process_alias.csv',
+  property_unmapped: 'property นี้ไม่อยู่ใน property_alias.csv',
+  unit_incompatible: 'หน่วยไม่เข้ากับ property (เช่น Voc ใส่หน่วยเป็น %)',
+  unit_assumed: 'ไม่ได้ใส่หน่วย จึงใช้หน่วยมาตรฐานของ property นั้นแทน',
+  ff_fraction_scaled: 'FF เขียนเป็นเศษส่วน (0.76) จึงคูณ 100 ให้',
+  material_unmapped: 'วัสดุนี้ไม่อยู่ใน dictionary จึงเก็บชื่อตามที่พิมพ์ (ควรเพิ่ม alias)',
+  vendor_unmapped: 'vendor นี้ไม่อยู่ใน dictionary จึงเก็บชื่อตามที่พิมพ์',
+  solvent_unmapped: 'solvent นี้ไม่อยู่ใน dictionary จึงเก็บชื่อตามที่พิมพ์',
+  ingredient_role_unmapped: 'ค่า Type ใน Materials ไม่อยู่ใน dictionary',
+  // validate
+  out_of_range: 'ค่าอยู่นอกช่วงที่เป็นไปได้',
+  fk_layer_missing: 'LayerID ที่อ้างถึงไม่มีอยู่ใน sheet Layer (หรือชั้นนั้นถูกกักไว้)',
+  layer_duplicate: 'LayerID ซ้ำกัน',
+  step_order_duplicate: 'StepOrder ซ้ำกันในชั้นเดียวกัน',
+  measurement_duplicate: 'property เดียวกันถูกรายงานมากกว่าหนึ่งครั้ง',
+  pce_inconsistent: 'PCE ไม่ตรงกับ Voc × Jsc × FF / 100 (ต่างกันเกิน 5%)',
+  perovskite_stoichiometry: 'สัดส่วนไอออนในสูตร perovskite รวมไม่ได้ A=1, B=1, X=3',
+  psk_missing: 'อุปกรณ์นี้ไม่มีชั้น PSK',
+  retention_derived: 'คำนวณ retention จาก Final PCE / Initial PCE',
+  retention_inconsistent: 'retention ไม่ตรงกับ Final PCE / Initial PCE',
+  encapsulation_missing: 'ไม่ได้ระบุ encapsulation',
+};
+const ROLE_COLOR = { anode: '#8a94a6', htl: '#d9534f', htl_treatment: '#e8918e', psk: '#2f6fdb',
+  psk_treatment: '#7fa6ec', etl: '#2e9e5b', etl_treatment: '#7cc79b', cathode: '#c8a13a' };
+const STEP_TH = { ingest: '01 ingest', structure: '02 structure', standardize: '03 standardize',
+  resolve: '04 resolve', validate: '05 validate', load: '06 load' };
+
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const dash = (v) => (v === null || v === undefined || v === '' ? '<span class="hint">–</span>' : esc(v));
+const fmt = (v) => {
+  if (v === null || v === undefined) return null;
+  if (typeof v !== 'number') return v;
+  if (v !== 0 && (Math.abs(v) >= 1e6 || Math.abs(v) < 1e-3)) return v.toExponential(3);
+  return +v.toPrecision(6);
+};
+const QUAL = { eq: '', lt: '< ', gt: '> ', le: '≤ ', ge: '≥ ', approx: '≈ ' };
+const numCell = (v, min, max, q, unit) => {
+  if (v === null || v === undefined) return dash(null);
+  let s = (QUAL[q] ?? '') + fmt(v);
+  if (min !== null && min !== undefined && max !== null && max !== undefined) s = `${fmt(min)}–${fmt(max)}`;
+  return esc(s) + (unit ? ` <span class="hint">${esc(unit)}</span>` : '');
+};
+
+let results = [];
+let selected = null;
+
+function normalize(json) {
+  const d = json?.data ?? json;
+  if (Array.isArray(d)) return { summary: null, results: d };
+  if (Array.isArray(d?.results)) return { summary: d.summary ?? null, results: d.results };
+  if (d?.file && d?.status) return { summary: null, results: [d] };
+  throw new Error('ไม่พบ results ใน JSON — ต้องเป็น response ของ /v1/clean-data/run');
+}
+
+function render(text) {
+  const msg = $('msg');
+  msg.className = 'msg'; msg.textContent = '';
+  let parsed;
+  try { parsed = normalize(JSON.parse(text)); }
+  catch (e) { msg.className = 'msg bad'; msg.textContent = 'อ่าน JSON ไม่ได้: ' + e.message; $('out').classList.add('hidden'); return; }
+  results = parsed.results;
+  selected = null;
+  msg.textContent = `โหลดแล้ว ${results.length} ไฟล์`;
+  $('out').classList.remove('hidden');
+  $('detail').classList.add('hidden');
+  renderSummary();
+  renderFiles();
+  initSheetView();
+  if (results.length === 1) select(0);
+}
+
+// ---------- Excel-like view (after clean) ----------
+
+const ROLE_LABEL = { anode: 'Anode', htl: 'HTL', htl_treatment: 'HTL treatment', psk: 'PSK',
+  psk_treatment: 'PSK treatment', etl: 'ETL', etl_treatment: 'ETL treatment', cathode: 'Cathode' };
+const SHEETS = ['Layer', 'Vender', 'Materials', 'Process', 'Properties', 'Stability'];
+const view = { paper: null, index: null, sheet: 'Layer' };
+let papers = new Map(); // paper key -> result indexes sorted by sample_no
+
+const paperKey = (r) => r.file.file_prefix ?? r.file.doi ?? r.file.file_name;
+
+// ---------- results stopped early with ?until= : read `state` instead of `clean` ----------
+
+const STAGE_NOTE = {
+  ingest: 'ค่าดิบตามที่อ่านมาจาก Excel ยังไม่ได้ clean',
+  structure: 'ตั้งชื่อ header และตัดแถวว่างแล้ว แต่ค่ายังเป็นข้อความดิบ',
+  standardize: 'แปลงตัวเลข ช่วงค่า และหน่วยแล้ว แต่ชื่อยังไม่ได้ map กับ dictionary (PCBM ยังไม่เป็น PC61BM) และยังไม่ได้ตรวจคุณภาพ',
+  resolve: 'map ชื่อกับ dictionary แล้ว แต่ยังไม่ได้ตรวจคุณภาพ แถวที่มี error จึงยังปนอยู่',
+  validate: 'ตรวจคุณภาพแล้ว แสดงเฉพาะแถวที่ผ่าน (ยังไม่ได้สร้าง gold และ summary)',
+};
+const nv = (prefix, v) => ({
+  [prefix]: v?.value ?? null, [`${prefix}_min`]: v?.value_min ?? null, [`${prefix}_max`]: v?.value_max ?? null,
+  [`${prefix}_qualifier`]: v?.qualifier ?? 'eq', [`${prefix}_raw`]: v?.value_raw ?? null,
+});
+const srcOf = (x) => ({ source_sheet: x.lineage?.source_sheet, source_row: x.lineage?.source_row });
+const nameOf = (m) => (m ? m.material ?? m.name : null);
+
+// Records from step 03 / 04 / 05 -> the same shape as the gold JSON, so every table works
+function recordsToGold(d, file) {
+  const solventLabel = (s) => {
+    if (s.label) return s.label;
+    const many = s.components.length > 1;
+    return s.components.map((c) => (c.material ?? c.raw) + (many && c.fraction !== null ? ` ${c.fraction.toFixed(2)}` : '')).join(' + ')
+      + (many && s.basis ? ` (${s.basis})` : '');
+  };
+  return {
+    paper: { doi: file.doi, file_prefix: file.file_prefix, doi_verified: file.doi_verified },
+    sample: { sample_no: file.sample_no, architecture: null, source_file: file.file_name, file_sha256: file.sha256 },
+    layers: (d.layers ?? []).map((l) => ({
+      position: l.position, sub_order: l.sub_order, role: l.role ?? l.layer_type, layer_type_raw: l.layer_type_raw,
+      material_raw: l.material_raw,
+      components: l.components.map((c, i) => ({ seq: i + 1, material: nameOf(c), known: c.known, form: c.form, notes: c.notes, perovskite_composition: c.composition })),
+      thickness_nm: l.thickness?.value ?? null, thickness_min_nm: l.thickness?.value_min ?? null, thickness_max_nm: l.thickness?.value_max ?? null,
+      thickness_qualifier: l.thickness?.qualifier ?? 'eq', thickness_raw: l.thickness?.value_raw ?? null, ...srcOf(l),
+    })),
+    layer_ingredients: (d.ingredients ?? []).map((r) => ({
+      layer_position: r.position, material: nameOf(r.material), material_known: r.material?.known, material_raw: r.material?.raw ?? null,
+      form: r.material?.form ?? null, role: r.role ?? r.role_raw, role_raw: r.role_raw,
+      solvent_system: r.solvent ? { label: solventLabel(r.solvent), basis: r.solvent.basis, raw: r.solvent.raw } : null,
+      amount: r.amount?.value ?? null, amount_min: r.amount?.value_min ?? null, amount_max: r.amount?.value_max ?? null,
+      amount_qualifier: r.amount?.qualifier ?? 'eq', unit: r.amount?.unit ?? null, conc_mg_per_ml: r.conc_mg_per_ml,
+      amount_raw: r.amount?.value_raw ?? null, unit_raw: r.amount?.unit_raw ?? null, ...srcOf(r),
+    })),
+    process_steps: (d.processes ?? []).map((p) => ({
+      layer_position: p.position, scope: p.scope, step_order: p.step_order, process_type: p.process_type ?? p.process_type_raw,
+      category: p.category ?? null, process_type_raw: p.process_type_raw, description: p.description, remarks: p.remarks,
+      params: p.params.map((x) => ({ ...x, param: x.param ?? x.quantity })), ...srcOf(p),
+    })),
+    material_sources: (d.vendors ?? []).flatMap((v) => {
+      const vendors = v.vendors?.length ? v.vendors
+        : v.vendors_raw?.length ? v.vendors_raw.map((n) => ({ vendor: n })) : [{ vendor: null }];
+      return v.materials.flatMap((m) => vendors.map((x) => ({
+        material: nameOf(m), material_known: m.known, material_raw: m.raw, vendor: x.vendor, vendor_known: x.known,
+        purity_pct: v.purity_pct, purity_min: v.purity_min, purity_max: v.purity_max, purity_qualifier: v.purity_qualifier,
+        grade: v.grade, purity_raw: v.purity_raw, spec: v.spec, ...srcOf(v),
+      })));
+    }),
+    measurements: (d.measurements ?? []).map((m) => ({
+      property: m.property ?? m.property_name, statistic: m.statistic, scan: m.scan, context: m.context ?? [],
+      value: m.value?.value ?? null, value_min: m.value?.value_min ?? null, value_max: m.value?.value_max ?? null,
+      error: m.value?.error ?? null, qualifier: m.value?.qualifier ?? 'eq', unit: m.value?.unit ?? null,
+      value_raw: m.value?.value_raw ?? null, unit_raw: m.value?.unit_raw ?? null, property_raw: m.property_raw,
+      source_ref: m.source_ref, remarks: m.remarks, ...srcOf(m),
+    })),
+    stability_tests: (d.stability ?? []).map((s) => ({
+      atmosphere: s.atmosphere, light: s.light, mode: s.mode, isos_code: s.isos_code, encapsulated: s.encapsulated,
+      ...nv('temperature_c', s.temperature_c), ...nv('rh_pct', s.rh_pct), ...nv('duration_h', s.duration_h),
+      ...nv('retention_pct', s.retention_pct), ...nv('t80_h', s.t80_h),
+      initial_pce: s.initial_pce?.value ?? null, final_pce: s.final_pce?.value ?? null, environment_raw: s.environment_raw, ...srcOf(s),
+    })),
+    v_device_summary: {},
+  };
+}
+
+// Gold-shaped data for a result: clean output, or the state of the step the run stopped at
+function goldOf(r) {
+  if (r.clean) return r.clean;
+  const st = r.state;
+  if (!st?.data) return null;
+  if (st.step === 'load') return st.data.gold;
+  if (st.step === 'validate') return recordsToGold(st.data.passed ?? {}, st.file);
+  if (st.step === 'standardize' || st.step === 'resolve') return recordsToGold(st.data, st.file);
+  return null;
+}
+
+// Steps 01 / 02 are still sheet-shaped - show them as plain sheets
+function rawSheetsOf(r) {
+  const st = r.state;
+  if (st?.step === 'ingest') {
+    return (st.data.sheets ?? []).map((s) => ({ name: s.name, header: s.header.map((h) => h ?? ''), rows: s.rows.map((x) => x.cells) }));
+  }
+  if (st?.step === 'structure') {
+    return Object.entries(st.data).filter(([, rows]) => rows.length).map(([name, rows]) => {
+      const header = [...new Set(rows.flatMap((x) => Object.keys(x.values)))];
+      return { name, header, rows: rows.map((x) => header.map((h) => x.values[h])) };
+    });
+  }
+  return null;
+}
+
+const hasData = (r) => !!(goldOf(r) || rawSheetsOf(r)?.length);
+
+function initSheetView() {
+  papers = new Map();
+  results.forEach((r, i) => {
+    const k = paperKey(r);
+    papers.set(k, [...(papers.get(k) ?? []), i]);
+  });
+  for (const list of papers.values()) list.sort((a, b) => (results[a].file.sample_no ?? 0) - (results[b].file.sample_no ?? 0));
+  const keys = [...papers.keys()].sort();
+  $('paperSel').innerHTML = keys.map((k) => `<option value="${esc(k)}">${esc(k)} (${papers.get(k).length} sample)</option>`).join('');
+  $('paperSel').onchange = (e) => showPaper(e.target.value);
+  if (keys.length) showPaper(keys[0]);
+}
+
+function showPaper(key, index) {
+  view.paper = key;
+  view.index = index ?? papers.get(key)[0];
+  $('paperSel').value = key;
+  renderSheetView();
+}
+
+function renderSheetView() {
+  const r = results[view.index];
+  const list = papers.get(view.paper);
+  const g = goldOf(r);
+  const raw = g ? null : rawSheetsOf(r);
+  const names = g ? SHEETS : (raw ?? []).map((s) => s.name);
+  const sheet = names.includes(view.sheet) ? view.sheet : names[0] ?? view.sheet;
+  let table;
+  if (g) table = sheetTable(g, sheet);
+  else if (raw?.length) {
+    const s = raw.find((x) => x.name === sheet);
+    table = xl(s.header, s.rows.map((cells) => s.header.map((_, i) => val(cells[i]))));
+  } else table = '<div class="empty-note">sample นี้ไม่มีข้อมูลหลัง clean (' + esc(r.status) + ')</div>';
+  $('sheetView').innerHTML = `
+    <div class="sheet-head">
+      <div><h2>${esc(view.paper)}</h2><div class="hint">${esc(r.file.doi ?? '')}</div></div>
+      <div class="pills">${list.map((i) => {
+        const x = results[i];
+        return `<button class="pill ${i === view.index ? 'on' : ''} ${hasData(x) ? '' : 'bad'}" data-i="${i}" title="${esc(x.status)}">Sample ${esc(x.file.sample_no ?? '?')}</button>`;
+      }).join('')}</div>
+    </div>
+    <div class="sheet-tabs">${names.map((s) => `<button data-s="${esc(s)}" class="${s === sheet ? 'on' : ''}">${esc(s)}</button>`).join('')}</div>
+    ${r.stopped_at ? `<div class="stage-note"><b>หยุดที่ขั้น ${esc(STEP_TH[r.stopped_at] ?? r.stopped_at)}</b> — ${esc(STAGE_NOTE[r.stopped_at] ?? '')}
+      <div class="hint">รันจนครบทุกขั้นด้วย <span class="mono">POST /v1/clean-data/run</span> โดยไม่ใส่ <span class="mono">?until=</span></div></div>` : ''}
+    <div class="row" style="margin:-8px 0 10px;gap:6px">${r.stopped_at
+      ? `<span class="badge b-plain">ยังไม่ครบทุกขั้น · error ${r.stats?.errors ?? 0} · warning ${r.stats?.warnings ?? 0}</span>`
+      : `<span class="badge b-${esc(r.status)}">${esc(r.status)}</span>`}
+      ${r.stats?.rows_quarantined ? `<span class="hint">${r.stats.rows_quarantined} แถวถูกกักไว้ ไม่แสดงในตารางนี้ (ดูได้ในรายละเอียดไฟล์ → ไม่ผ่าน)</span>` : ''}</div>
+    ${table}`;
+  $('sheetView').querySelectorAll('.pill').forEach((b) => (b.onclick = () => { view.index = Number(b.dataset.i); renderSheetView(); }));
+  $('sheetView').querySelectorAll('.sheet-tabs button').forEach((b) => (b.onclick = () => { view.sheet = b.dataset.s; renderSheetView(); }));
+}
+
+const xl = (head, rows) => rows.length
+  ? `<div class="xl"><table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
+      rows.map((cells) => `<tr>${cells.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+  : '<div class="empty-note">ไม่มีข้อมูลใน sheet นี้</div>';
+const val = (v) => (v === null || v === undefined || v === '' ? '-' : esc(fmt(v)));
+const rng = (v, min, max, q) => {
+  if (v === null || v === undefined) return '-';
+  if (min !== null && min !== undefined && max !== null && max !== undefined) return `${esc(fmt(min))}–${esc(fmt(max))}`;
+  return esc((QUAL[q] ?? '') + fmt(v));
+};
+const isNew = (known) => (known === false ? '<span class="new" title="ไม่อยู่ใน dictionary">●</span>' : '');
+
+function sheetTable(g, sheet) {
+  if (sheet === 'Layer') {
+    return xl(['LayerID', 'LayerType', 'Material', 'Thickness (nm)'], g.layers.map((l) => [
+      `${l.position}${l.sub_order > 1 ? '.' + l.sub_order : ''}`,
+      esc(ROLE_LABEL[l.role] ?? l.role ?? '-') + (l.sub_order > 1 ? ' ' + l.sub_order : ''),
+      l.components.length
+        ? l.components.map((c) => esc(c.material) + (c.form ? ` <span class="sm">(${esc(c.form)})</span>` : '') + isNew(c.known)).join(' / ')
+        : '-',
+      rng(l.thickness_nm, l.thickness_min_nm, l.thickness_max_nm, l.thickness_qualifier),
+    ]));
+  }
+  if (sheet === 'Vender') {
+    return xl(['Material', '%Purity', 'Vender', 'Grade'], g.material_sources.map((v) => [
+      esc(v.material ?? '-') + isNew(v.material_known),
+      v.purity_pct !== null ? rng(v.purity_pct, v.purity_min, v.purity_max, v.purity_qualifier)
+        : v.spec ? `<span class="sm">${esc(v.spec.kind)}: ${esc(v.spec.raw)}</span>` : '-',
+      esc(v.vendor ?? '-') + (v.vendor ? isNew(v.vendor_known) : ''),
+      val(v.grade),
+    ]));
+  }
+  if (sheet === 'Materials') {
+    return xl(['LayerID', 'Material', 'Type', 'Solvent', 'Amount', 'Unit'], g.layer_ingredients.map((m) => [
+      val(m.layer_position),
+      esc(m.material ?? '-') + (m.form ? ` <span class="sm">(${esc(m.form)})</span>` : '') + isNew(m.material_known),
+      val(m.role),
+      m.solvent_system ? esc(m.solvent_system.label) : '-',
+      rng(m.amount, m.amount_min, m.amount_max, m.amount_qualifier),
+      val(m.unit),
+    ]));
+  }
+  if (sheet === 'Process') {
+    return xl(['LayerID', 'StepOrder', 'ProcessType', 'Descriptions', 'Parameter', 'Unit'], g.process_steps.map((p) => [
+      val(p.layer_position) + (p.scope === 'material_synthesis' ? ' <span class="sm">synthesis</span>' : ''),
+      val(p.step_order),
+      esc(p.process_type ?? '-') + (p.category ? ` <span class="sm">${esc(p.category)}</span>` : ''),
+      val(p.description),
+      p.params.length
+        ? p.params.map((x) => `<span class="sm">${esc(x.param)}</span> ${rng(x.value, x.value_min, x.value_max, x.qualifier)}`).join(', ')
+        : '-',
+      p.params.length ? esc(p.params.map((x) => x.unit ?? '-').join(', ')) : '-',
+    ]));
+  }
+  if (sheet === 'Properties') {
+    return xl(['Properties', 'Statistic', 'Scan', 'Values', 'Errors', 'Unit', 'Remarks'], g.measurements.map((m) => [
+      esc(m.property ?? '-') + (m.context?.length ? ` <span class="sm">(${esc(m.context.join(', '))})</span>` : ''),
+      val(m.statistic),
+      val(m.scan === 'NA' ? null : m.scan),
+      rng(m.value, m.value_min, m.value_max, m.qualifier),
+      val(m.error),
+      val(m.unit),
+      [m.source_ref, m.remarks].filter(Boolean).map(esc).join(' · ') || '-',
+    ]));
+  }
+  return xl(['Environment', 'Encapsulation', 'Temperature (°C)', 'Humidity (%)', 'Time (hr)', 'Retention (%)', 'T80 (hr)'],
+    g.stability_tests.map((s) => [
+      [s.atmosphere, s.light, s.mode, s.isos_code].filter(Boolean).map(esc).join(' · ') || '-',
+      s.encapsulated === true ? 'Y' : s.encapsulated === false ? 'N' : '-',
+      rng(s.temperature_c, s.temperature_c_min, s.temperature_c_max, s.temperature_c_qualifier),
+      rng(s.rh_pct, s.rh_pct_min, s.rh_pct_max, s.rh_pct_qualifier),
+      rng(s.duration_h, s.duration_h_min, s.duration_h_max, s.duration_h_qualifier),
+      rng(s.retention_pct, s.retention_pct_min, s.retention_pct_max, s.retention_pct_qualifier),
+      rng(s.t80_h, s.t80_h_min, s.t80_h_max, s.t80_h_qualifier),
+    ]));
+}
+
+function renderSummary() {
+  const by = (s) => results.filter((r) => r.status === s).length;
+  const sum = (k) => results.reduce((a, r) => a + (r.stats?.[k] ?? 0), 0);
+  $('cards').innerHTML = [
+    ['', results.length, 'ไฟล์ทั้งหมด'],
+    ['ok', by('passed'), 'passed'],
+    ['warn', by('partial'), 'partial'],
+    ['err', by('failed'), 'failed'],
+    ['dup', by('duplicate'), 'duplicate'],
+    ['ok', sum('rows_clean'), 'แถวที่ผ่าน (clean)'],
+    ['err', sum('rows_quarantined'), 'แถวที่ถูกกัก'],
+  ].map(([c, n, l]) => `<div class="card ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+  const count = (issues) => issues.reduce((a, i) => ((a[i.rule] = (a[i.rule] ?? 0) + 1), a), {});
+  const errs = count(results.flatMap((r) => r.quarantine?.errors ?? []));
+  const warns = count(results.flatMap((r) => r.warnings ?? []));
+  $('errBars').innerHTML = bars(errs, 'var(--err)');
+  $('warnBars').innerHTML = bars(warns, 'var(--warn)');
+}
+
+function bars(counts, color) {
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) return '<div class="empty-note">ไม่มี 🎉</div>';
+  const max = entries[0][1];
+  return entries.map(([rule, n]) => `
+    <div class="bar" title="${esc(RULES[rule] ?? rule)}">
+      <span class="name">${esc(rule)}</span>
+      <span class="track"><span class="fill" style="display:block;width:${(n / max) * 100}%;background:${color}"></span></span>
+      <span class="v">${n}</span>
+    </div>`).join('') + '<p class="hint" style="margin:6px 0 0">วางเมาส์บนแถบเพื่อดูความหมาย</p>';
+}
+
+function renderFiles() {
+  const q = $('q').value.trim().toLowerCase();
+  const st = $('fStatus').value;
+  $('files').innerHTML = results.map((r, i) => ({ r, i }))
+    .filter(({ r }) => (!st || r.status === st) && (!q || `${r.file.file_name} ${r.file.doi}`.toLowerCase().includes(q)))
+    .map(({ r, i }) => `
+      <tr class="file ${selected === i ? 'sel' : ''}" data-i="${i}">
+        <td class="mono">${esc(r.file.file_name)}</td>
+        <td class="mono">${dash(r.file.doi)}${r.file.doi_verified ? '' : ' <span class="badge b-plain" title="DOI ยังไม่ได้ยืนยัน">?</span>'}</td>
+        <td class="num">${dash(r.file.sample_no)}</td>
+        <td><span class="badge b-${esc(r.status)}">${esc(r.status)}</span>${r.stopped_at ? ` <span class="badge b-plain">หยุดที่ ${esc(r.stopped_at)}</span>` : ''}</td>
+        <td class="num">${r.stats?.rows_clean ?? 0}</td>
+        <td class="num">${r.stats?.rows_quarantined ?? 0}</td>
+        <td class="num">${r.stats?.errors ?? 0}</td>
+        <td class="num">${r.stats?.warnings ?? 0}</td>
+      </tr>`).join('') || '<tr><td colspan="8" class="empty-note">ไม่พบไฟล์</td></tr>';
+}
+
+function select(i) {
+  selected = i;
+  renderFiles();
+  const r = results[i];
+  showPaper(paperKey(r), i);
+  const g = goldOf(r);
+  const tabs = [
+    ['overview', 'ภาพรวม', null],
+    ['quarantine', 'ไม่ผ่าน', r.quarantine?.errors?.length ?? 0],
+    ['warnings', 'Warning', r.warnings?.length ?? 0],
+    ['layers', 'Layer', g?.layers?.length],
+    ['ingredients', 'Materials', g?.layer_ingredients?.length],
+    ['process', 'Process', g?.process_steps?.length],
+    ['measurements', 'Properties', g?.measurements?.length],
+    ['stability', 'Stability', g?.stability_tests?.length],
+    ['vendors', 'Vender', g?.material_sources?.length],
+    ['json', 'JSON ดิบ', null],
+  ];
+  const el = $('detail');
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between">
+      <div><h2 style="margin:0">${esc(r.file.file_name)}</h2>
+        <div class="hint">${esc(r.file.doi ?? '-')} · sample ${esc(r.file.sample_no ?? '-')} · sha256 ${esc((r.file.sha256 ?? '').slice(0, 12))}…</div></div>
+      <span class="badge b-${esc(r.status)}" style="font-size:14px">${esc(r.status)}</span>
+    </div>
+    <div class="tabs">${tabs.map(([k, l, c]) => `<button data-tab="${k}">${l}${c !== null && c !== undefined ? `<span class="c">${c}</span>` : ''}</button>`).join('')}</div>
+    <div id="tabBody"></div>`;
+  el.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  showTab(r.quarantine && !g ? 'quarantine' : 'overview');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showTab(tab) {
+  document.querySelectorAll('#detail .tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  const r = results[selected];
+  const g = goldOf(r);
+  const body = $('tabBody');
+  const noClean = '<div class="empty-note">ไฟล์นี้ไม่มี clean output' + (r.stopped_at ? ` (รันถึงขั้น ${esc(STEP_TH[r.stopped_at])} เท่านั้น ดูที่แท็บ JSON ดิบ)` : '') + '</div>';
+  const views = {
+    overview: () => overview(r),
+    quarantine: () => quarantineView(r),
+    warnings: () => issueList(r.warnings ?? [], 'warn') || '<div class="empty-note">ไม่มี warning</div>',
+    layers: () => (g ? layersTable(g.layers) : noClean),
+    ingredients: () => (g ? ingredientsTable(g.layer_ingredients) : noClean),
+    process: () => (g ? processTable(g.process_steps) : noClean),
+    measurements: () => (g ? measurementsTable(g.measurements) : noClean),
+    stability: () => (g ? stabilityTable(g.stability_tests) : noClean),
+    vendors: () => (g ? vendorsTable(g.material_sources) : noClean),
+    json: () => `<details open><summary>ผลลัพธ์ทั้งหมดของไฟล์นี้</summary><pre>${esc(JSON.stringify(r, null, 2))}</pre></details>`,
+  };
+  body.innerHTML = views[tab]();
+}
+
+function overview(r) {
+  const g = goldOf(r);
+  const s = r.stats ?? {};
+  let html = `<div class="kv">
+    <div><span>แถวทั้งหมด</span><b>${s.rows_in ?? 0}</b></div>
+    <div><span>แถวที่ผ่าน</span><b style="color:var(--ok)">${s.rows_clean ?? 0}</b></div>
+    <div><span>แถวที่ถูกกัก</span><b style="color:var(--err)">${s.rows_quarantined ?? 0}</b></div>
+    <div><span>Error / Warning</span><b>${s.errors ?? 0} / ${s.warnings ?? 0}</b></div>
+  </div>`;
+  if (!g) return html + '<p class="empty-note">ไม่มี clean output ให้ดูที่แท็บ “ไม่ผ่าน”</p>';
+
+  const v = g.v_device_summary ?? {};
+  const metric = (label, val, unit) => `<div class="metric"><div class="n">${val === null || val === undefined ? '–' : esc(fmt(val))}<span class="hint" style="font-size:13px"> ${unit}</span></div><div class="l">${label}</div></div>`;
+  html += `<h3>ประสิทธิภาพ (ค่าดีสุด)</h3><div class="metrics">
+    ${metric('PCE champion', v.pce_champion, '%')}
+    ${metric('Voc champion', v.voc_champion, 'V')}
+    ${metric('Jsc champion', v.jsc_champion, 'mA/cm²')}
+    ${metric('FF champion', v.ff_champion, '%')}
+    ${metric('PCE average', v.pce_average, '%')}
+    ${metric('Stability retention', v.stability_retention_pct, `% @ ${v.stability_duration_h ?? '–'} h`)}
+  </div>`;
+
+  html += `<div class="two" style="margin-top:6px"><div>
+    <h3>โครงสร้างเซลล์ <span class="hint">(ล่าง = substrate · ${esc(g.sample.architecture === 'pin' ? 'p-i-n (inverted)' : g.sample.architecture === 'nip' ? 'n-i-p' : 'ไม่ทราบ architecture')})</span></h3>
+    <div class="stack">${g.layers.map((l) => {
+      const names = l.components.map((c) => esc(c.material) + (c.form ? ` <span class="hint">[${esc(c.form)}]</span>` : '')).join(' / ');
+      return `<div class="layer ${names ? '' : 'empty'}" style="border-left-color:${ROLE_COLOR[l.role] ?? '#999'}">
+        <span class="role" style="color:${ROLE_COLOR[l.role] ?? 'inherit'}">${esc(l.role ?? '?')}${l.sub_order > 1 ? ' ' + l.sub_order : ''}</span>
+        <span>${names || '<span class="hint">(ไม่มีชั้นนี้)</span>'}</span>
+        <span class="t">${l.thickness_nm !== null ? numCell(l.thickness_nm, l.thickness_min_nm, l.thickness_max_nm, l.thickness_qualifier, 'nm') : ''}</span>
+      </div>`;
+    }).join('')}</div></div><div>`;
+
+  if (v.psk_composition?.length) {
+    html += `<h3>สูตร perovskite (ABX₃)</h3><div class="kv">${['A', 'B', 'X'].map((site) => `<div><span>${site}-site</span><b>${
+      v.psk_composition.filter((c) => c.site === site).map((c) => `${esc(c.ion)} ${fmt(c.fraction)}`).join(' · ') || '–'}</b></div>`).join('')}</div>`;
+  }
+  html += `<h3>สรุปรายชั้น (v_device_summary)</h3><div class="kv">
+    ${['anode', 'htl', 'htl_treatment', 'psk', 'psk_treatment', 'etl', 'etl_treatment', 'cathode'].map((k) => `<div><span>${k}</span><b>${dash(v[k])}</b></div>`).join('')}
+  </div></div></div>`;
+  return html;
+}
+
+function quarantineView(r) {
+  const q = r.quarantine;
+  if (!q) return '<div class="empty-note">ทุกแถวผ่าน ไม่มีอะไรถูกกัก ✅</div>';
+  const rowKeys = new Set((q.rows ?? []).map((x) => `${x.lineage.source_sheet}#${x.lineage.source_row}`));
+  const fileLevel = q.errors.filter((e) => !rowKeys.has(`${e.sheet}#${e.row_no}`));
+  let html = '<p class="hint">แถวเหล่านี้ไม่ได้ถูกใส่ใน clean output ควรแก้ใน Excel หรือเพิ่ม alias ใน dictionary แล้วรันใหม่</p>';
+  if (fileLevel.length) html += '<h3>ปัญหาระดับไฟล์ / sheet</h3>' + issueList(fileLevel, 'error');
+  if (q.rows?.length) {
+    html += `<h3>แถวที่ถูกกัก (${q.rows.length})</h3>`;
+    html += q.rows.map((row) => {
+      const errs = row.issues.filter((i) => i.severity === 'error');
+      const warns = row.issues.filter((i) => i.severity !== 'error');
+      return `<div class="issue">
+        <div class="head"><b>${esc(row.lineage.source_sheet)}</b><span class="hint">แถว ${row.lineage.source_row} ใน Excel</span>
+          ${errs.map((e) => `<span class="badge b-error">${esc(e.rule)}</span>`).join('')}
+          ${warns.map((e) => `<span class="badge b-warn">${esc(e.rule)}</span>`).join('')}</div>
+        ${errs.map((e) => `<div>${esc(e.message)}${e.suggestion ? ` <span class="hint">→ ควรเป็น “${esc(e.suggestion)}”?</span>` : ''}<div class="why">${esc(RULES[e.rule] ?? '')} · พบในขั้น ${esc(STEP_TH[e.step] ?? e.step)}</div></div>`).join('')}
+        <div class="rawrow">${Object.entries(row.raw ?? {}).map(([k, v]) => `<span><i>${esc(k)}:</i> ${v === null ? '<i>∅</i>' : esc(v)}</span>`).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+  return html;
+}
+
+function issueList(issues, kind) {
+  if (!issues.length) return '';
+  return issues.map((i) => `<div class="issue ${kind === 'warn' ? 'warn' : ''}">
+    <div class="head"><span class="badge ${kind === 'warn' ? 'b-warn' : 'b-error'}">${esc(i.rule)}</span>
+      <span class="hint">${esc(i.sheet ?? '')}${i.row_no ? ' แถว ' + i.row_no : ''}${i.column_name ? ' · ' + esc(i.column_name) : ''} · ${esc(STEP_TH[i.step] ?? i.step)}</span></div>
+    <div>${esc(i.message)}${i.raw_value !== undefined && i.raw_value !== null ? ` <span class="raw">ค่าดิบ: ${esc(i.raw_value)}</span>` : ''}${i.suggestion ? ` <span class="hint">→ ควรเป็น “${esc(i.suggestion)}”?</span>` : ''}</div>
+    ${RULES[i.rule] ? `<div class="why">${esc(RULES[i.rule])}</div>` : ''}
+  </div>`).join('');
+}
+
+const table = (head, rows) => rows.length
+  ? `<div class="scroll"><table><thead><tr>${head.map((h) => `<th${h.startsWith('#') ? ' class="num"' : ''}>${esc(h.replace(/^#/, ''))}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`
+  : '<div class="empty-note">ไม่มีข้อมูล</div>';
+const src = (x) => `<td class="hint">${esc(x.source_sheet)} #${x.source_row}</td>`;
+const unknown = (known) => (known === false ? ' <span class="badge b-warn" title="ไม่อยู่ใน dictionary">ใหม่</span>' : '');
+
+function layersTable(layers) {
+  return table(['#ตำแหน่ง', 'บทบาท', 'วัสดุ (clean)', 'ค่าดิบ', 'ความหนา', 'แหล่ง'], layers.map((l) => `<tr>
+    <td class="num">${l.position}${l.sub_order > 1 ? '.' + l.sub_order : ''}</td>
+    <td><span class="badge" style="background:${ROLE_COLOR[l.role] ?? '#999'}22;color:${ROLE_COLOR[l.role] ?? 'inherit'}">${esc(l.role)}</span></td>
+    <td>${l.components.map((c) => `<span class="chip">${esc(c.material)}${c.form ? ' · ' + esc(c.form) : ''}</span>${unknown(c.known)}${c.perovskite_composition ? `<div class="hint">${c.perovskite_composition.map((p) => `${p.site}:${p.ion} ${fmt(p.fraction)}`).join(' ')}</div>` : ''}`).join('') || dash(null)}</td>
+    <td class="raw">${dash(l.material_raw)}</td>
+    <td>${numCell(l.thickness_nm, l.thickness_min_nm, l.thickness_max_nm, l.thickness_qualifier, 'nm')}<div class="raw">${esc(l.thickness_raw ?? '')}</div></td>
+    ${src(l)}</tr>`));
+}
+
+function ingredientsTable(rows) {
+  return table(['#Layer', 'สาร', 'บทบาท', 'Solvent (clean)', 'ปริมาณ (clean)', 'ค่าดิบ', 'แหล่ง'], rows.map((r) => `<tr>
+    <td class="num">${dash(r.layer_position)}</td>
+    <td>${dash(r.material)}${unknown(r.material_known)}${r.form ? ` <span class="hint">[${esc(r.form)}]</span>` : ''}</td>
+    <td>${dash(r.role)}</td>
+    <td>${r.solvent_system ? esc(r.solvent_system.label) + `<div class="raw">${esc(r.solvent_system.raw)}</div>` : dash(null)}</td>
+    <td>${numCell(r.amount, r.amount_min, r.amount_max, r.amount_qualifier, r.unit)}${r.conc_mg_per_ml !== null && r.unit !== 'mg/mL' ? `<div class="hint">${fmt(r.conc_mg_per_ml)} mg/mL</div>` : ''}</td>
+    <td class="raw">${esc(r.amount_raw ?? '')} ${esc(r.unit_raw ?? '')}</td>
+    ${src(r)}</tr>`));
+}
+
+function processTable(rows) {
+  return table(['#Layer', '#Step', 'ประเภท', 'Category', 'พารามิเตอร์ (clean)', 'ค่าดิบ', 'แหล่ง'], rows.map((p) => `<tr>
+    <td class="num">${dash(p.layer_position)}${p.scope === 'material_synthesis' ? '<div class="hint">synthesis</div>' : ''}</td>
+    <td class="num">${dash(p.step_order)}</td>
+    <td><b>${dash(p.process_type)}</b><div class="raw">${esc(p.process_type_raw ?? '')}</div>${p.description ? `<div class="hint">${esc(p.description)}</div>` : ''}</td>
+    <td>${dash(p.category)}</td>
+    <td>${p.params.map((x) => `<span class="chip">${esc(x.param)} = ${numCell(x.value, x.value_min, x.value_max, x.qualifier, x.unit)}</span>`).join('') || dash(null)}</td>
+    <td class="raw">${p.params.map((x) => `${esc(x.value_raw)} ${esc(x.unit_raw)}`).join(', ')}</td>
+    ${src(p)}</tr>`));
+}
+
+function measurementsTable(rows) {
+  return table(['Property', 'Statistic', 'Scan', 'ค่า (clean)', '± Error', 'ค่าดิบ', 'อ้างอิง', 'แหล่ง'], rows.map((m) => `<tr>
+    <td><b>${dash(m.property)}</b>${m.context?.length ? ` <span class="hint">(${esc(m.context.join(', '))})</span>` : ''}<div class="raw">${esc(m.property_raw ?? '')}</div></td>
+    <td>${esc(m.statistic)}</td><td>${esc(m.scan)}</td>
+    <td>${numCell(m.value, m.value_min, m.value_max, m.qualifier, m.unit)}</td>
+    <td>${dash(fmt(m.error))}</td>
+    <td class="raw">${esc(m.value_raw ?? '')} ${esc(m.unit_raw ?? '')}</td>
+    <td>${dash(m.source_ref)}${m.remarks ? `<div class="hint">${esc(m.remarks)}</div>` : ''}</td>
+    ${src(m)}</tr>`));
+}
+
+function stabilityTable(rows) {
+  return table(['บรรยากาศ', 'แสง', 'โหมด', 'ISOS', 'Encap.', 'อุณหภูมิ', 'RH', 'เวลา', 'Retention', 'T80', 'Environment ดิบ', 'แหล่ง'], rows.map((s) => `<tr>
+    <td>${dash(s.atmosphere)}</td><td>${dash(s.light)}</td><td>${dash(s.mode)}</td><td>${dash(s.isos_code)}</td>
+    <td>${s.encapsulated === true ? 'Y' : s.encapsulated === false ? 'N' : dash(null)}</td>
+    <td>${numCell(s.temperature_c, s.temperature_c_min, s.temperature_c_max, s.temperature_c_qualifier, '°C')}</td>
+    <td>${numCell(s.rh_pct, s.rh_pct_min, s.rh_pct_max, s.rh_pct_qualifier, '%')}</td>
+    <td>${numCell(s.duration_h, s.duration_h_min, s.duration_h_max, s.duration_h_qualifier, 'h')}</td>
+    <td>${numCell(s.retention_pct, s.retention_pct_min, s.retention_pct_max, s.retention_pct_qualifier, '%')}</td>
+    <td>${numCell(s.t80_h, s.t80_h_min, s.t80_h_max, s.t80_h_qualifier, 'h')}</td>
+    <td class="raw">${esc(s.environment_raw ?? '')}</td>
+    ${src(s)}</tr>`));
+}
+
+function vendorsTable(rows) {
+  return table(['สาร', 'ค่าดิบ', 'Vendor', 'Purity', 'Grade / อื่นๆ', 'แหล่ง'], rows.map((v) => `<tr>
+    <td>${dash(v.material)}${unknown(v.material_known)}</td>
+    <td class="raw">${esc(v.material_raw ?? '')}</td>
+    <td>${dash(v.vendor)}${v.vendor ? unknown(v.vendor_known) : ''}</td>
+    <td>${v.purity_pct !== null ? numCell(v.purity_pct, v.purity_min, v.purity_max, v.purity_qualifier, '%') : dash(null)}<div class="raw">${esc(v.purity_raw ?? '')}</div></td>
+    <td>${dash(v.grade)}${v.spec ? `<div class="hint">${esc(v.spec.kind)}: ${esc(v.spec.raw)}</div>` : ''}</td>
+    ${src(v)}</tr>`));
+}
+
+$('go').addEventListener('click', () => render($('input').value));
+$('clear').addEventListener('click', () => { $('input').value = ''; $('out').classList.add('hidden'); $('msg').textContent = ''; });
+$('file').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const text = await f.text();
+  $('input').value = text.length > 200000 ? text.slice(0, 200000) + '\n… (ตัดแสดงบางส่วน)' : text;
+  render(text);
+});
+$('q').addEventListener('input', renderFiles);
+$('fStatus').addEventListener('change', renderFiles);
+$('files').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr.file');
+  if (tr) select(Number(tr.dataset.i));
+});
+</script>
+</body>
+</html>
